@@ -40,6 +40,7 @@ public class StoreResource {
   @GET
   @Path("{id}")
   public Store getSingle(Long id) {
+    validateId(id, "store");
     Store entity = Store.findById(id);
     if (entity == null) {
       throw new WebApplicationException("Store with id of " + id + " does not exist.", 404);
@@ -129,12 +130,19 @@ public class StoreResource {
   @Path("{id}")
   @Transactional
   public Response delete(Long id) {
+    validateId(id, "store");
     Store entity = Store.findById(id);
     if (entity == null) {
       throw new WebApplicationException("Store with id of " + id + " does not exist.", 404);
     }
     entity.delete();
     return Response.status(204).build();
+  }
+
+  private void validateId(Long id, String resourceName) {
+    if (id == null || id <= 0) {
+      throw new WebApplicationException("Invalid " + resourceName + " id: " + id, 400);
+    }
   }
 
   @Provider

@@ -38,6 +38,7 @@ public class ProductResource {
   @GET
   @Path("{id}")
   public Product getSingle(Long id) {
+    validateId(id, "product");
     Product entity = productRepository.findById(id);
     if (entity == null) {
       throw new WebApplicationException("Product with id of " + id + " does not exist.", 404);
@@ -84,12 +85,19 @@ public class ProductResource {
   @Path("{id}")
   @Transactional
   public Response delete(Long id) {
+    validateId(id, "product");
     Product entity = productRepository.findById(id);
     if (entity == null) {
       throw new WebApplicationException("Product with id of " + id + " does not exist.", 404);
     }
     productRepository.delete(entity);
     return Response.status(204).build();
+  }
+
+  private void validateId(Long id, String resourceName) {
+    if (id == null || id <= 0) {
+      throw new WebApplicationException("Invalid " + resourceName + " id: " + id, 400);
+    }
   }
 
   @Provider

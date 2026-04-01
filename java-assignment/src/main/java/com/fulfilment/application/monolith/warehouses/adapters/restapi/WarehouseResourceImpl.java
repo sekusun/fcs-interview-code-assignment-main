@@ -42,7 +42,7 @@ public class WarehouseResourceImpl implements WarehouseResource {
 
   @Override
   public Warehouse getAWarehouseUnitByID(String id) {
-    DbWarehouse entity = warehouseRepository.findById(Long.parseLong(id));
+    DbWarehouse entity = warehouseRepository.findById(parseWarehouseId(id));
     if (entity == null || entity.archivedAt != null) {
       throw new WebApplicationException("Warehouse not found: " + id, 404);
     }
@@ -52,7 +52,7 @@ public class WarehouseResourceImpl implements WarehouseResource {
   @Override
   @Transactional
   public void archiveAWarehouseUnitByID(String id) {
-    DbWarehouse entity = warehouseRepository.findById(Long.parseLong(id));
+    DbWarehouse entity = warehouseRepository.findById(parseWarehouseId(id));
     if (entity == null || entity.archivedAt != null) {
       throw new WebApplicationException("Warehouse not found: " + id, 404);
     }
@@ -75,6 +75,14 @@ public class WarehouseResourceImpl implements WarehouseResource {
       throw new WebApplicationException(e.getMessage(), e.getStatusCode());
     }
     return toWarehouseResponse(domainWarehouse);
+  }
+
+  private Long parseWarehouseId(String id) {
+    try {
+      return Long.parseLong(id);
+    } catch (NumberFormatException e) {
+      throw new WebApplicationException("Invalid warehouse id: " + id, 400);
+    }
   }
 
   private com.fulfilment.application.monolith.warehouses.domain.models.Warehouse toDomainModel(

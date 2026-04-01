@@ -34,9 +34,44 @@ jobs:
           chmod +x mvnw
           ./mvnw -B clean verify -Dquarkus.package.jar.type=fast-jar
 
+      - name: Publish JaCoCo summary
+        if: always()
+        run: |
+          if [ -f target/site/jacoco/jacoco.csv ]; then
+            awk -F, '
+              BEGIN { inst_missed=0; inst_covered=0; line_missed=0; line_covered=0 }
+              NR>1 {
+                inst_missed += $4; inst_covered += $5;
+                line_missed += $8; line_covered += $9;
+              }
+              END {
+                inst_total = inst_missed + inst_covered;
+                line_total = line_missed + line_covered;
+                inst_pct = (inst_total > 0) ? (inst_covered * 100 / inst_total) : 0;
+                line_pct = (line_total > 0) ? (line_covered * 100 / line_total) : 0;
+                printf("## JaCoCo Coverage\n\n") > "coverage-summary.md";
+                printf("- Instruction coverage: %.2f%% (%d/%d)\n", inst_pct, inst_covered, inst_total) >> "coverage-summary.md";
+                printf("- Line coverage: %.2f%% (%d/%d)\n", line_pct, line_covered, line_total) >> "coverage-summary.md";
+              }
+            ' target/site/jacoco/jacoco.csv
+            cat coverage-summary.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "JaCoCo report not found at target/site/jacoco/jacoco.csv" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Upload JVM artifact
         uses: actions/upload-artifact@v4
         with:
           name: quarkus-app
           path: java-assignment/target/quarkus-app/
+          retention-days: 7
+
+      - name: Upload JaCoCo report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: |
+            java-assignment/target/site/jacoco/
+            java-assignment/target/jacoco.exec
           retention-days: 7

@@ -40,6 +40,11 @@ public class FulfillmentResource {
   @GET
   @Path("store/{storeId}")
   public List<FulfillmentResponse> getByStore(Long storeId) {
+    validateId(storeId, "store");
+    Store store = Store.findById(storeId);
+    if (store == null) {
+      throw new WebApplicationException("Store not found: " + storeId, 404);
+    }
     return fulfillmentRepository.findByStore(storeId).stream()
         .map(FulfillmentResponse::from)
         .toList();
@@ -48,6 +53,11 @@ public class FulfillmentResource {
   @GET
   @Path("warehouse/{warehouseId}")
   public List<FulfillmentResponse> getByWarehouse(Long warehouseId) {
+    validateId(warehouseId, "warehouse");
+    DbWarehouse warehouse = warehouseRepository.findById(warehouseId);
+    if (warehouse == null || warehouse.archivedAt != null) {
+      throw new WebApplicationException("Warehouse not found: " + warehouseId, 404);
+    }
     return fulfillmentRepository.findByWarehouse(warehouseId).stream()
         .map(FulfillmentResponse::from)
         .toList();
@@ -141,6 +151,7 @@ public class FulfillmentResource {
   @Path("{id}")
   @Transactional
   public Response delete(Long id) {
+    validateId(id, "fulfillment assignment");
     FulfillmentAssignment entity = fulfillmentRepository.findById(id);
     if (entity == null) {
       throw new WebApplicationException(
@@ -148,5 +159,11 @@ public class FulfillmentResource {
     }
     fulfillmentRepository.delete(entity);
     return Response.status(204).build();
+  }
+
+  private void validateId(Long id, String resourceName) {
+    if (id == null || id <= 0) {
+      throw new WebApplicationException("Invalid " + resourceName + " id: " + id, 400);
+    }
   }
 }

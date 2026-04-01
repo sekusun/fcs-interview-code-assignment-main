@@ -42,4 +42,14 @@ class ProductEndpointTest {
         .statusCode(200)
         .body(not(containsString(uniqueName)), containsString("TONSTAD"), containsString("KALLAX"));
   }
+
+  @Test
+  void get_invalidId_returns400() {
+    given().when().get("product/0").then().statusCode(400);
+  }
+
+  @Test
+  void delete_invalidId_returns400() {
+    given().when().delete("product/0").then().statusCode(400);
+  }
 }

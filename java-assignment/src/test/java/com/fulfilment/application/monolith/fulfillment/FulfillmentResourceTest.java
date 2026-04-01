@@ -252,6 +252,42 @@ class FulfillmentResourceTest {
         .statusCode(400);
   }
 
+  @Test
+  @Order(11)
+  void get_negative_byStore_invalidId_returns400() {
+    given().when().get("/fulfillment/store/0").then().statusCode(400);
+  }
+
+  @Test
+  @Order(12)
+  void get_negative_byWarehouse_invalidId_returns400() {
+    given().when().get("/fulfillment/warehouse/0").then().statusCode(400);
+  }
+
+  @Test
+  @Order(13)
+  void delete_negative_invalidId_returns400() {
+    given().when().delete("/fulfillment/0").then().statusCode(400);
+  }
+
+  @Test
+  @Order(14)
+  void get_negative_byStore_unknownId_returns404() {
+    given().when().get("/fulfillment/store/999999").then().statusCode(404);
+  }
+
+  @Test
+  @Order(15)
+  void get_negative_byWarehouse_unknownId_returns404() {
+    given().when().get("/fulfillment/warehouse/999999").then().statusCode(404);
+  }
+
+  @Test
+  @Order(16)
+  void delete_negative_unknownId_returns404() {
+    given().when().delete("/fulfillment/999999").then().statusCode(404);
+  }
+
   private static Map<String, Object> body(long productId, long storeId, long warehouseId) {
     Map<String, Object> m = new HashMap<>();
     m.put("productId", productId);

@@ -27,6 +27,21 @@ class WarehouseResourceTest {
   }
 
   @Test
+  void get_error_invalidId_returns400() {
+    given().when().get("/warehouse/not-a-number").then().statusCode(400);
+  }
+
+  @Test
+  void delete_error_invalidId_returns400() {
+    given().when().delete("/warehouse/not-a-number").then().statusCode(400);
+  }
+
+  @Test
+  void delete_error_unknownId_returns404() {
+    given().when().delete("/warehouse/999999").then().statusCode(404);
+  }
+
+  @Test
   void post_negative_invalidLocation_returns400() {
     String bu = "TEST.WH.HTTP." + UUID.randomUUID().toString().substring(0, 8);
     given()
